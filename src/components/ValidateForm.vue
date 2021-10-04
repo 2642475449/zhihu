@@ -22,7 +22,7 @@
   // 第二步 实例化 mitt 的时候，作为泛型传递进去
   export const emitter = mitt<Events>()
   export default defineComponent({
-    name: 'ValidateFrom',
+    name: 'ValidateForm',
     emits:['form-submit'],
     setup(props, context) {
       let funcArr: ValidateFunc[] = []

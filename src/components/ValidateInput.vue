@@ -14,7 +14,7 @@
 
 <script lang="ts">
   import {defineComponent, reactive, PropType,onMounted} from 'vue'
-  import {emitter} from "@/components/ValidateFrom.vue";
+  import {emitter} from "@/components/ValidateForm.vue";
 
   // 校验规则是组件内置的，外部只输入一个符合RulesProp的数据，其他工作交给组件内部处理
   const emailReg = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
