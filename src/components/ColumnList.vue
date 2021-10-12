@@ -14,19 +14,19 @@
 </template>
 
 <script lang="ts">
+  import {defineComponent, PropType, computed} from 'vue'
 
-  import { defineComponent, PropType, computed } from 'vue'
-  import { ColumnProps } from '../store'
+  import {ColumnProps} from "@/store";
 
   export default defineComponent({
     name: 'ColumnList',
     props: {
-      list: {
+      list:{
         type: Array as PropType<ColumnProps[]>,
         required: true
       }
     },
-    setup(props) {
+    setup(props){
       const columnList = computed(() => {
         return props.list.map(column => {
           if (!column.avatar) {
@@ -36,18 +36,21 @@
           } else {
             column.avatar.url = column.avatar.url + '?x-oss-process=image/resize,m_pad,h_50,w_50'
           }
-          return column
+          return column;
         })
       })
       return {
         columnList
-      }
+      };
     }
-  })
+  }
+
+  )
 </script>
+
 <style scoped>
   .card-body img {
     width: 50px;
     height: 50px;
   }
-</style>
+  </style>

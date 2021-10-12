@@ -11,7 +11,17 @@ axios.interceptors.request.use(config => {
   return config
 })
 
+//  请求拦截器
+axios.interceptors.request.use(config => {
+  store.commit('setLoading', true)
+  return config
+})
 
+//  响应拦截器
+axios.interceptors.response.use(config => {
+  store.commit('setLoading', false)
+  return config
+})
 
 const app = createApp(App)
 app.use(store)
