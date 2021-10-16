@@ -4,7 +4,6 @@ import Login from './views/Login.vue'
 import ColumnDetail from "@/components/ColumnDetail.vue";
 import CreatePost from "@/views/CreatePost.vue";
 import store from "@/store";
-import {computed} from "vue";
 
 const routerHistory = createWebHistory()
 const router = createRouter({
