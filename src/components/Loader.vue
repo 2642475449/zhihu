@@ -15,6 +15,7 @@
 
 <script lang="ts">
   import { defineComponent, onUnmounted } from 'vue'
+  import useDOMCreate from "@/hooks/useDOMCreate";
   export default defineComponent({
     name: 'Loader',
     props: {
@@ -28,14 +29,7 @@
       },
     },
     setup()  {
-      // document 功能可以将 teleport 中的内容添加在根标签中和在 index.html 中添加类似
-      const node = document.createElement('div');
-      node.id = 'back'
-      document.body.appendChild(node);
-      onUnmounted(() => {
-        //  删除节点
-        document.body.removeChild(node)
-      } )
+      useDOMCreate('back')
     }
   })
 </script>

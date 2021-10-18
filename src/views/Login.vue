@@ -31,6 +31,7 @@
   import ValidateForm from '../components/ValidateForm.vue'
 
   import router from "@/router";
+  import createMessage from "@/components/createMessage";
 
   export default defineComponent({
     name: 'Login',
@@ -58,8 +59,13 @@
             password: passwordVal.value
           }
           store.dispatch('loginAndFetch',payload).then( data => {
-            console.log(data)
-            router.push('/')
+            createMessage('登录成功','success')
+            setTimeout(() => {
+              router.push('/')
+            },2000)
+
+          }).catch(e => {
+            console.log(e)
           })
         }
       }

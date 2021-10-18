@@ -19,8 +19,10 @@ axios.interceptors.request.use(config => {
   } else {
     // 普通的 body 对象，添加到 data 中
     config.data = { ...config.data, icode: 'B6967281BC50E354' }
+
   }
   store.commit('setLoading', true)
+  store.commit('setError', { status: false, message: ''})
 
   return config
 })
@@ -35,6 +37,12 @@ axios.interceptors.response.use(config => {
   },1000)
 
   return config
+},e => {
+  const {error} = e.response.data
+  console.log("error",error)
+  store.commit('setError', { status: true, message: error})
+  store.commit('setLoading',false)
+  return Promise.reject(error)
 })
 
 const app = createApp(App)
