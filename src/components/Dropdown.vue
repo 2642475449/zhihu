@@ -24,7 +24,6 @@
       const dropdownRef = ref<null | HTMLElement>(null)
       const toggleOpen = () => {
         isOpen.value = !isOpen.value
-        console.log("现在状态为：" + isOpen.value)
       }
       const isClickOutside = useClickOutside(dropdownRef)
 

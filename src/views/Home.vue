@@ -1,4 +1,10 @@
 <template>
+  <uploader action="/upload" :before-upload="beforeUpload" @file-uploaded="onFileUploaded">
+
+    <template #uploaded="dataProps">
+      <img :src="dataProps.uploadedData.data.url" width="500">
+    </template>
+  </uploader>
   <div class="home-page">
     <section class="py-5 text-center container">
       <div class="row py-lg-5">
@@ -19,13 +25,16 @@
 <script lang="ts">
   import { defineComponent, computed, onMounted } from 'vue'
   import { useStore } from 'vuex'
-  import { GlobalDataProps } from '../store'
+  import { GlobalDataProps, ResponseType, ImageProps } from '../store'
+  import Uploader from "@/components/Uploader.vue";
   import ColumnList from '../components/ColumnList.vue'
+  import createMessage from "@/components/createMessage";
 
   export default defineComponent({
     name: 'Home',
     components: {
-      ColumnList
+      ColumnList,
+      Uploader
     },
     setup() {
       const store = useStore<GlobalDataProps>()
@@ -33,8 +42,26 @@
         store.dispatch('fetchColumns')
       })
       const list = computed(() => store.state.columns)
+
+
+      //上传检查
+      const beforeUpload = (file: File) => {
+        const isImage = file.type == 'image/jpeg' || file.type == 'image/png'
+        if (!isImage) {
+          createMessage('上传图片只能是 JPG 与 PNG 格式','error')
+        }
+        return isImage
+      }
+
+      const onFileUploaded = (rawData: ResponseType<ImageProps>) => {
+        createMessage(`上传图片ID ${rawData.data._id}`,'success')
+      }
+
+
       return {
-        list
+        list,
+        beforeUpload,
+        onFileUploaded
       }
     }
   })

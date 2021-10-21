@@ -30,6 +30,7 @@
       const currentId = route.params.id
       const store = useStore<GlobalDataProps>();
       onMounted(() => {
+
         store.dispatch('fetchPosts',currentId)
         store.dispatch('fetchColumn',currentId)
 
@@ -37,6 +38,7 @@
 
       const column = computed(() => store.getters.getColumnById(currentId));
       const list = computed(() => store.getters.getPostsByCid(currentId));
+
 
       return {
         column,

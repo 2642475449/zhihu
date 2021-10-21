@@ -1,5 +1,6 @@
 <template>
   <div class="validate-input-container pb-3">
+<!--    @blur 是当元素失去焦点时触发的事件-->
     <input
       v-if="tag != 'textarea'"
       class="form-control"
@@ -30,13 +31,15 @@
   // 校验规则是组件内置的，外部只输入一个符合RulesProp的数据，其他工作交给组件内部处理
   const emailReg = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 
-  // RuleProp的规则是可以在type里拓展的，目前只进行了非空和邮箱格式的校验
+  /**
+   *  RuleProp Rules can be extended in type
+   *  PS： `validator` is can customize
+   */
   interface RuleProp {
-    type: 'required' | 'email' | 'range',
+    type: 'required' | 'email' | 'custom'
     message?: string,
-    validator?: () => boolean,
-    min?: { length: number, message: string },
-    max?: { length: number; message: string }
+
+    validator?: () => boolean;
   }
 
   // 这里导出RulesProp，因为外部在使用该组件的时候要提交符合RulesProp的数据，所以把接口规范导出
@@ -60,14 +63,21 @@
         error: false,
         message: ''
       })
-      const updateValue = (e: KeyboardEvent) => {
 
+      /**
+       *  键盘事件
+       *
+        */
+      const updateValue = (e: KeyboardEvent) => {
         const targetValue = (e.target as HTMLInputElement).value
         inputRef.val = targetValue
         context.emit('update:modelValue', targetValue)
       }
+
+      //  input格式验证
       const validateInput = () => {
         if (props.rules) {
+          console.log("props.rules",props.rules)
           const allPassed = props.rules.every(rule => {
             let passed = true
             inputRef.message = rule.message || ''
@@ -81,12 +91,8 @@
               case 'email':
                 passed = emailReg.test(inputRef.val)
                 break
-              // 密码格式检验
-              case 'range':
-                if (inputRef.val.length < 6) {
-                  passed = false
-                  inputRef.message = '密码格式错误'
-                }
+              case 'custom':
+                passed = rule.validator ? rule.validator() : true;
                 break
               default:
                 break
