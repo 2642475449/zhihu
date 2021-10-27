@@ -1,8 +1,9 @@
 <template>
   <div class="create-post-page">
-    <h4>新建文章</h4>
+    <h4>{{isEditMode ? '编辑文章' : '新建文章'}}</h4>
     <Uploader action="/upload"
               :before-upload="uploadCheck"
+              :uploaded="uploadedData"
               @file-uploaded="handleFileUploaded"
               class="d-flex align-items-center justify-content-center bg-light text-secondary w-100 my-4"
     >
@@ -19,11 +20,13 @@
         <img :src="dataProps.uploadedData.data.url">
       </template>
     </Uploader>
+    <h2>{{titleVal}}</h2>
     <validate-form @form-submit="onFormSubmit">
       <div class="mb-3">
         <label class="form-label">文章标题：</label>
         <validate-input
-          :rules="titleRules" v-model="titleVal"
+          :rules="titleRules"
+          v-model="titleVal"
           placeholder="请输入文章标题"
           type="text"
         />
@@ -39,16 +42,16 @@
         />
       </div>
       <template #submit>
-        <button class="btn btn-primary btn-large">发表文章</button>
+        <button class="btn btn-primary btn-large">{{isEditMode ? '更新文章' : '发表文章'}}</button>
       </template>
     </validate-form>
   </div>
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref } from 'vue'
+  import { defineComponent, ref,onMounted } from 'vue'
   import { useStore } from 'vuex'
-  import { useRouter } from 'vue-router'
+  import {useRoute, useRouter} from 'vue-router'
   import {GlobalDataProps, ImageProps, PostProps, ResponseType} from '../store'
   import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
   import ValidateForm from '../components/ValidateForm.vue'
@@ -67,8 +70,13 @@
       Uploader
     },
     setup() {
+      const uploadedData = ref()
       const titleVal = ref('')
       const router = useRouter()
+      const route = useRoute()
+      //  “!!” 两个叹号表示把目标值转化为布尔值，相当于使用Boolean()方法
+      //  if id exists that isEditMode is `true`
+      const isEditMode = !!route.query.id;
       const store = useStore<GlobalDataProps>()
       let imageId = ''
       const titleRules: RulesProp = [
@@ -78,6 +86,20 @@
       const contentRules: RulesProp = [
         { type: 'required', message: '文章详情不能为空' }
       ]
+
+      onMounted(() => {
+        if (isEditMode) {
+          store.dispatch('fetchPost',route.query.id).then((rawData: ResponseType<PostProps>) => {
+            const currentPost = rawData.data
+            if (currentPost.image) {
+              uploadedData.value = { data: currentPost.image }
+            }
+            titleVal.value = currentPost.title
+            contentVal.value = currentPost.content || ''
+          })
+        }
+      })
+
       const handleFileUploaded = (rawData: ResponseType<ImageProps>) => {
         if (rawData.data._id) {
           imageId = rawData.data._id
@@ -97,7 +119,12 @@
             if (imageId) {
               newPost.image = imageId
             }
-            store.dispatch('createPost',newPost).then(() => {
+            const actionName = isEditMode ? 'updatePost' : 'createPost'
+            const sendData = isEditMode ? {
+              id: route.query.id,
+              payload: newPost
+              } : newPost
+            store.dispatch(actionName,sendData).then(() => {
               createMessage('发表成功，2秒后跳转到文章','success',2000)
               setTimeout(() => {
                 router.push({name: 'column',params:{id:column}})
@@ -159,7 +186,9 @@
         beforeUpload,
         onFileUploaded,
         uploadCheck,
-        handleFileUploaded
+        handleFileUploaded,
+        uploadedData,
+        isEditMode
       }
     }
   })

@@ -9,9 +9,7 @@
         <slot v-else name="default">
           <button class="btn btn-primary">点击上传</button>
         </slot>
-        <slot v-if="fileStatus != 'ready'">
-          <button class="btn btn-primary" @click.stop="deleted">删除</button>
-        </slot>
+
       </div>
       <input
         type="file"
@@ -24,8 +22,10 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, PropType} from 'vue'
+  import { defineComponent, ref, PropType, watch} from 'vue'
   import axios from "axios";
+  import {PostProps} from "@/store";
+
   type UploaderStatus = 'ready' | 'loading' | 'success' | 'error'
   type CheckFunction = (file: File) => boolean;
   export default defineComponent({
@@ -38,6 +38,9 @@
       },
       beforeUpload: {
         type: Function as PropType<CheckFunction>
+      },
+      uploaded: {
+        type: Object
       }
 
     },
@@ -47,8 +50,14 @@
     //  props是一个对象，包含父组件传递给子组件的所有数据
     setup(props, context) {
       const fileInput = ref<null | HTMLInputElement>(null)
-      const fileStatus = ref<UploaderStatus>('ready')
-      const uploadedData = ref()
+      const fileStatus = ref<UploaderStatus>(props.uploaded ? 'success' : 'ready')
+      const uploadedData = ref(props.uploaded)
+      watch(() => props.uploaded, (newValue) => {
+        if (newValue) {
+          fileStatus.value = 'success'
+          uploadedData.value = newValue
+        }
+      })
       // trigger(触发) input 中绑定 fileInput
       const triggerUpload = () => {
         if (fileInput.value) {
@@ -78,8 +87,9 @@
             headers: {
               'Content-Type': 'multipart/form-data'
             }
-          }).then(resp => {
+          }).then((resp: any)  => {
             fileStatus.value = "success"
+            console.log('resp.data',resp.data)
             uploadedData.value = resp.data
             context.emit('file-uploaded', resp.data)
           }).catch((error) => {
@@ -95,7 +105,6 @@
 
       //  删除
       const deleted = () => {
-        uploadedData.value = ''
         fileStatus.value = 'ready'
       }
 

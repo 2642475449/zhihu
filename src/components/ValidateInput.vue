@@ -5,18 +5,16 @@
       v-if="tag != 'textarea'"
       class="form-control"
       :class="{'is-invalid': inputRef.error}"
-      :value="inputRef.val"
       @blur="validateInput"
-      @input="updateValue"
+      v-model="inputRef.val"
       v-bind="$attrs"
     >
     <textarea
       v-else
       class="form-control"
       :class="{'is-invalid': inputRef.error}"
-      :value="inputRef.val"
       @blur="validateInput"
-      @input="updateValue"
+      v-model="inputRef.val"
       v-bind="$attrs">
 
     </textarea>
@@ -25,7 +23,7 @@
 </template>
 
 <script lang="ts">
-  import {defineComponent, reactive, PropType, onMounted} from 'vue'
+  import {defineComponent, reactive, PropType, onMounted, watch, computed} from 'vue'
   import {emitter} from "@/components/ValidateForm.vue";
 
   // 校验规则是组件内置的，外部只输入一个符合RulesProp的数据，其他工作交给组件内部处理
@@ -38,7 +36,6 @@
   interface RuleProp {
     type: 'required' | 'email' | 'custom'
     message?: string,
-
     validator?: () => boolean;
   }
 
@@ -59,20 +56,17 @@
     inheritAttrs: false,
     setup(props, context) {
       const inputRef = reactive({
-        val: props.modelValue || '',
+        val: computed({
+          get: () => props.modelValue || '',
+          set: val => {
+            context.emit('update:modelValue',val)
+          }
+        }),
         error: false,
         message: ''
       })
 
-      /**
-       *  键盘事件
-       *
-        */
-      const updateValue = (e: KeyboardEvent) => {
-        const targetValue = (e.target as HTMLInputElement).value
-        inputRef.val = targetValue
-        context.emit('update:modelValue', targetValue)
-      }
+
 
       //  input格式验证
       const validateInput = () => {
@@ -113,7 +107,6 @@
       return {
         inputRef,
         validateInput,
-        updateValue
       }
     }
   })
