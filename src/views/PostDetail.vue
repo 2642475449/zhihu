@@ -1,5 +1,11 @@
 <template>
   <div class="post-detail-page">
+    <Modal title="删除文章" :visible="modalIsVisible"
+           @modal-on-close="modalIsVisible = false"
+           @modal-on-confirm="hideAndDelete"
+    >
+      <p>确定要删除这篇文章吗？</p>
+    </Modal>
     <article class="w-75 mx-auto mb-5 pb-3" v-if="currentPost" >
       <img :src="currentImageUrl" alt="currentPost.title"  class="rounded-lg img-fluid my-4" v-if="currentImageUrl">
       <h2 class="mb-4">{{currentPost.title}}</h2>
@@ -19,32 +25,37 @@
         >
           编辑
         </router-link>
-        <button type="button" class="btn btn-danger">删除</button>
+        <button type="button" class="btn btn-danger" @click.prevent="modalIsVisible = true">删除</button>
       </div>
     </article>
   </div>
 </template>
 
 <script lang="ts">
-  import { defineComponent, onMounted, computed} from 'vue'
+  import { defineComponent, onMounted, computed, ref, watch} from 'vue'
   import MarkdownIt from 'markdown-it';
-  import { useRoute } from 'vue-router'
+  import { useRoute, useRouter } from 'vue-router'
+
   import { useStore } from 'vuex'
-  import { GlobalDataProps, PostProps, ImageProps, UserProps } from "@/store";
+  import { GlobalDataProps, PostProps, ImageProps, UserProps, ResponseType } from "@/store";
   import UserProfile from "@/components/UserProfile.vue";
+  import Modal from "@/components/Modal.vue";
+  import createMessage from "@/components/createMessage";
 
   export default defineComponent({
     name: 'PostDetail',
     components: {
-      UserProfile
+      UserProfile,
+      Modal
     },
     setup() {
       const store = useStore<GlobalDataProps>();
       const route = useRoute();
+      const router = useRouter();
+      const modalIsVisible = ref(false)
       const md = new MarkdownIt();
       //  得到动态 ID
       const currentId = route.params.id
-
 
       onMounted(() => {
         store.dispatch('fetchPost',currentId)
@@ -77,12 +88,23 @@
           return null
         }
       })
+      const hideAndDelete = () => {
+        modalIsVisible.value = false
+        store.dispatch('deletePost',currentId).then((rawData: ResponseType<PostProps>) => {
+          createMessage('删除成功2中转到专栏首页','success', 2000)
+          setTimeout(() => {
+            router.push({ name: 'column',params: {id: rawData.data.column}})
+          }, 2000)
+        })
+      }
 
       return {
         currentPost,
         currentImageUrl,
         currentHTML,
-        showEditArea
+        showEditArea,
+        modalIsVisible,
+        hideAndDelete
       }
 
     }
