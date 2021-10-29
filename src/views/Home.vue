@@ -25,7 +25,7 @@
 <script lang="ts">
   import { defineComponent, computed, onMounted } from 'vue'
   import { useStore } from 'vuex'
-  import { GlobalDataProps, ResponseType, ImageProps } from '../store'
+  import {GlobalDataProps, ResponseType, ImageProps, ColumnProps} from '../store'
   import Uploader from "@/components/Uploader.vue";
   import ColumnList from '../components/ColumnList.vue'
   import createMessage from "@/components/createMessage";
@@ -41,8 +41,9 @@
       onMounted(() => {
         store.dispatch('fetchColumns')
       })
-      const list = computed(() => store.state.columns)
 
+      // const list = computed(() => store.state.columns)
+      const list = computed(() => store.getters.getColumns)
 
       //上传检查
       const beforeUpload = (file: File) => {

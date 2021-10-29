@@ -41,3 +41,43 @@ export function beforeUploadCheck(file: File, condition: CheckCondition) {
     error
   }
 }
+
+interface TestProps {
+  _id:string;
+  name:string;
+}
+
+const testData: TestProps[] = [{_id:'1',name:'a'},{_id:'2', name:'b'}]
+
+
+const testData2: {[key: string]: TestProps} = {
+  1: { _id: '1', name: 'a' },
+  2: { _id: '2', name: 'b' }
+}
+
+/**
+ * 数据转对象工具
+ * reduce(数组的一个累加器) 它接收两个参数
+ * 1：function(之前的结果,当前值)
+ * 2：初始值
+ * 如果 current._id 是存在中进行累加
+  */
+export const arrToObj = <T extends {_id?:string}>(arr: Array<T>) => {
+  return arr.reduce((prev, current) => {
+    if (current._id)
+    {
+      prev[current._id] = current
+    }
+    return prev}, {} as { [key:string]: T})
+}
+export const objToArr = <T>(obj: {[key: string]: T}) => {
+  return Object.keys(obj).map(key => obj[key])
+}
+
+const result = arrToObj(testData)
+console.log(result)
+
+
+
+const result2 = objToArr(testData2)
+console.log(result2)
